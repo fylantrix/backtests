@@ -1,18 +1,41 @@
 import numpy as np
+from matplotlib.ticker import PercentFormatter
 import matplotlib.pyplot as plt
+import yfinance as yf
+import pandas as pd
 import random
 
-N_SIMS = 100
+class LinearRegression:
+    def __init__(self) -> None:
+        pass
 
-np.random.seed(random.randint(1, 1000000))
-data = {'a': np.arange(N_SIMS),
-        'c': np.empty(1)
-        }
-data['b'] = data['a'] + 10 * np.random.randn(N_SIMS)
-# data['d'] = np.abs(data['d']) * 100
 
-fig, ax = plt.subplots(figsize=(5, 2.7), layout='constrained')
-ax.scatter('a', 'b', data=data)
-ax.set_xlabel('entry a')
-ax.set_ylabel('entry b')
+plt.style.use("dark_background")
+
+prices = {}
+
+for ticker in ["GLD", "TLT"]:
+    data = yf.Ticker(ticker).history(
+        start="2025-01-01",
+        end="2026-12-31",
+        interval="1d",
+        auto_adjust=True,
+    )
+    prices[ticker] = data["Close"]
+
+returns_df = pd.DataFrame(prices).pct_change().dropna()
+
+
+plt.figure(figsize=(8, 6))
+plt.scatter(returns_df["GLD"], returns_df["TLT"], alpha=0.6)
+
+plt.axhline(0, color="gray", linewidth=0.8)
+plt.axvline(0, color="gray", linewidth=0.8)
+plt.xlabel("GLD daily return")
+plt.ylabel("TLT daily return")
+plt.title("Daily Returns: GLD vs. TLT")
+plt.grid(True, alpha=0.3)
+ax = plt.gca()
+ax.xaxis.set_major_formatter(PercentFormatter(1))
+ax.yaxis.set_major_formatter(PercentFormatter(1))
 plt.show()
